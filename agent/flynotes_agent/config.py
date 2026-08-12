@@ -11,7 +11,7 @@ DEFAULT_COMFY_ROOT = Path(
 )
 DEFAULT_WORKFLOW_CATALOG_URL = (
     "https://raw.githubusercontent.com/xufeifei083-maker/"
-    "zimao-workflows/main/catalog/catalog.json?v=260803-1"
+    "zimao-workflows/catalog-260803-1/catalog/catalog.json"
 )
 DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY = "r+yYk1hKvlN+mlhdxR8SzjvuvSHQ/Rtg6I7kScKj1GA="
 
