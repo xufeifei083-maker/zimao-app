@@ -38,7 +38,10 @@ def build(packages: Path, output: Path, base_url: str, key_path: Path) -> None:
             shutil.copyfile(source, destination)
             url_path = "/".join(("workflows", workflow_id, version, *Path(relative).parts))
             files[relative] = {
-                "url": f"{base_url.rstrip('/')}/{url_path}",
+                "url": (
+                    f"{base_url.rstrip('/')}/{url_path}"
+                    f"?sha256={hashlib.sha256(payload).hexdigest()}"
+                ),
                 "size": len(payload),
                 "sha256": hashlib.sha256(payload).hexdigest(),
             }

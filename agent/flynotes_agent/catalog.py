@@ -104,13 +104,15 @@ class WorkflowCatalogManager:
         if not self.config.workflow_catalog_url:
             raise CatalogError("CATALOG_URL_MISSING", "尚未配置工作流目录地址")
         url = self.config.workflow_catalog_url
+        parsed_url = httpx.URL(url)
+        signature_url = str(parsed_url.copy_with(path=f"{parsed_url.path}.sig"))
         try:
             async with httpx.AsyncClient(
                 timeout=60, follow_redirects=True, transport=self.transport
             ) as client:
                 catalog_response = await client.get(url)
                 catalog_response.raise_for_status()
-                signature_response = await client.get(f"{url}.sig")
+                signature_response = await client.get(signature_url)
                 signature_response.raise_for_status()
                 payload = catalog_response.content
                 self._verify(payload, signature_response.content)
