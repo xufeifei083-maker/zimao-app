@@ -1,0 +1,9 @@
+{
+  "width": {"type": "integer", "default": 480, "minimum": 32, "multipleOf": 32},
+  "height": {"type": "integer", "default": 832, "minimum": 32, "multipleOf": 32},
+  "duration": {"type": "number", "default": 5, "minimum": 2, "maximum": 15},
+  "steps": {"type": "integer", "default": 20, "minimum": 1, "maximum": 50},
+  "seed": {"type": "integer", "default": -1, "minimum": -1},
+  "refImageSize": {"type": "string", "default": "match", "enum": ["match", "max"]}
+}
+

@@ -1,0 +1,345 @@
+{
+  "114": {
+    "_meta": {
+      "title": "首帧图片"
+    },
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "3x4_美女戴着耳机_头向左偏 - 副本 (2).png"
+    }
+  },
+  "121": {
+    "_meta": {
+      "title": "Load VAE"
+    },
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    }
+  },
+  "122": {
+    "_meta": {
+      "title": "Load VAE"
+    },
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "123": {
+    "_meta": {
+      "title": "VAE Decode Audio"
+    },
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "127",
+        0
+      ],
+      "vae": [
+        "122",
+        0
+      ]
+    }
+  },
+  "124": {
+    "_meta": {
+      "title": "VAE Decode"
+    },
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "127",
+        0
+      ],
+      "vae": [
+        "121",
+        0
+      ]
+    }
+  },
+  "125": {
+    "_meta": {
+      "title": "KSamplerSelect"
+    },
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "126": {
+    "_meta": {
+      "title": "BasicScheduler"
+    },
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1,
+      "model": [
+        "136",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20
+    }
+  },
+  "127": {
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "128",
+        0
+      ],
+      "latent_image": [
+        "133",
+        1
+      ],
+      "noise": [
+        "131",
+        0
+      ],
+      "sampler": [
+        "125",
+        0
+      ],
+      "sigmas": [
+        "126",
+        0
+      ]
+    }
+  },
+  "128": {
+    "_meta": {
+      "title": "Basic Guider"
+    },
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "133",
+        0
+      ],
+      "model": [
+        "136",
+        0
+      ]
+    }
+  },
+  "129": {
+    "_meta": {
+      "title": "Load Diffusion Model"
+    },
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "130": {
+    "_meta": {
+      "title": "Load CLIP"
+    },
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "131": {
+    "_meta": {
+      "title": "RandomNoise"
+    },
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 490277372264072
+    }
+  },
+  "132": {
+    "_meta": {
+      "title": "Create Video"
+    },
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "123",
+        0
+      ],
+      "bit_depth": 8,
+      "fps": 24,
+      "images": [
+        "124",
+        0
+      ]
+    }
+  },
+  "133": {
+    "_meta": {
+      "title": "MiniMax H3 Image to Video"
+    },
+    "class_type": "MiniMaxH3ImageToVideo",
+    "inputs": {
+      "clip": [
+        "130",
+        0
+      ],
+      "first_frame": [
+        "138",
+        0
+      ],
+      "height": [
+        "140",
+        0
+      ],
+      "last_frame": [
+        "144",
+        0
+      ],
+      "length": [
+        "134",
+        1
+      ],
+      "prompt": "女人对着镜头说话：“今天就像是过年了一样开心，大家都在测试H3”，身体从一个角度转到另一个角度\n",
+      "vae": [
+        "121",
+        0
+      ],
+      "width": [
+        "139",
+        0
+      ]
+    }
+  },
+  "134": {
+    "_meta": {
+      "title": "Math Expression"
+    },
+    "class_type": "ComfyMathExpression",
+    "inputs": {
+      "expression": "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17",
+      "values.a": [
+        "135",
+        0
+      ]
+    }
+  },
+  "135": {
+    "_meta": {
+      "title": "Float (duration)"
+    },
+    "class_type": "PrimitiveFloat",
+    "inputs": {
+      "value": 5
+    }
+  },
+  "136": {
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "inputs": {
+      "allow_compile": false,
+      "model": [
+        "129",
+        0
+      ],
+      "sage_attention": "auto"
+    }
+  },
+  "137": {
+    "_meta": {
+      "title": "尾帧图片"
+    },
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "3x4_美女戴着耳机_头向左偏 (1).png"
+    }
+  },
+  "138": {
+    "_meta": {
+      "title": "Resize Image v2"
+    },
+    "class_type": "ImageResizeKJv2",
+    "inputs": {
+      "crop_position": "center",
+      "device": "cpu",
+      "divisible_by": 32,
+      "height": [
+        "140",
+        0
+      ],
+      "image": [
+        "114",
+        0
+      ],
+      "keep_proportion": "pad",
+      "pad_color": "255,255, 255",
+      "upscale_method": "nearest-exact",
+      "width": [
+        "139",
+        0
+      ]
+    }
+  },
+  "139": {
+    "_meta": {
+      "title": "WIDTH"
+    },
+    "class_type": "INTConstant",
+    "inputs": {
+      "value": 480
+    }
+  },
+  "140": {
+    "_meta": {
+      "title": "HEIGHT"
+    },
+    "class_type": "INTConstant",
+    "inputs": {
+      "value": 832
+    }
+  },
+  "144": {
+    "_meta": {
+      "title": "Resize Image v2"
+    },
+    "class_type": "ImageResizeKJv2",
+    "inputs": {
+      "crop_position": "center",
+      "device": "cpu",
+      "divisible_by": 32,
+      "height": [
+        "140",
+        0
+      ],
+      "image": [
+        "137",
+        0
+      ],
+      "keep_proportion": "pad",
+      "pad_color": "255,255, 255",
+      "upscale_method": "nearest-exact",
+      "width": [
+        "139",
+        0
+      ]
+    }
+  },
+  "92": {
+    "_meta": {
+      "title": "Save Video"
+    },
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "video/MiniMax_H3",
+      "format": "auto",
+      "video": [
+        "132",
+        0
+      ],
+      "video-preview": ""
+    }
+  }
+}

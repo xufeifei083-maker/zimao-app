@@ -1,0 +1,38 @@
+{
+  "全能参考生成视频": {
+    "filename": "reference-to-video.api.json",
+    "nodeCount": 43,
+    "nodeMap": {
+      "duration": "132",
+      "height": "156",
+      "prompt": "138",
+      "seed": "129",
+      "steps": "124",
+      "width": "158"
+    }
+  },
+  "图生视频（首帧/可选尾帧）": {
+    "filename": "image-to-video.api.json",
+    "nodeCount": 23,
+    "nodeMap": {
+      "duration": "135",
+      "height": "140",
+      "prompt": "133",
+      "seed": "131",
+      "steps": "126",
+      "width": "139"
+    }
+  },
+  "文生视频": {
+    "filename": "text-to-video.api.json",
+    "nodeCount": 19,
+    "nodeMap": {
+      "duration": "133",
+      "height": "136",
+      "prompt": "131",
+      "seed": "129",
+      "steps": "124",
+      "width": "135"
+    }
+  }
+}

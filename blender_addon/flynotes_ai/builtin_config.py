@@ -1,0 +1,31 @@
+CONFIG = {
+    "schemaVersion": 1,
+    "configVersion": "2026.08.10.1",
+    "models": [
+        {
+            "modelId": "minimax-h3-local",
+            "displayName": "MiniMax H3（本地）",
+            "provider": "local-agent",
+            "mediaType": "video",
+            "modes": ["text", "first_frame", "first_last", "reference"],
+            "inputSlots": {"maxImages": 9, "maxVideos": 3, "maxAudios": 3},
+            "ratios": ["9:16", "16:9", "1:1"],
+            "resolutions": ["480P"],
+            "durations": list(range(2, 16)),
+            "fields": [
+                {"key": "width", "type": "integer", "default": 480, "minimum": 32, "step": 32},
+                {"key": "height", "type": "integer", "default": 832, "minimum": 32, "step": 32},
+                {"key": "duration", "type": "number", "default": 5, "minimum": 2, "maximum": 15},
+                {"key": "steps", "type": "integer", "default": 20, "minimum": 1, "maximum": 50},
+                {"key": "seed", "type": "integer", "default": -1, "minimum": -1},
+                {"key": "refImageSize", "type": "enum", "default": "match", "options": ["match", "max"]},
+            ],
+        },
+        {"modelId": "gpt-image-2-vip", "displayName": "GPT Image 2", "mediaType": "image", "modes": ["text", "camera"], "inputSlots": {"maxImages": 16, "maxVideos": 0}, "ratios": ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "2:1", "1:2", "21:9", "9:21", "5:4", "4:5"], "resolutions": ["1K", "2K", "4K"], "qualities": ["low", "medium", "high"]},
+        {"modelId": "gemini-3.1-flash-image-preview", "displayName": "Nanobanana-2", "mediaType": "image", "modes": ["text", "camera"], "inputSlots": {"maxImages": 16, "maxVideos": 0}, "ratios": ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "2:1", "1:2", "21:9", "9:21", "5:4", "4:5", "1:4", "4:1", "1:8", "8:1"], "resolutions": ["1K", "2K", "4K"], "qualities": ["normal"]},
+        {"modelId": "grok-video-1.5-preview", "displayName": "Grok Video 1.5", "mediaType": "video", "modes": ["text"], "inputSlots": {"maxImages": 0, "maxVideos": 0}, "ratios": ["16:9", "9:16"], "resolutions": ["720P"], "durations": [10, 15]},
+        {"modelId": "seedance-2-mini", "displayName": "Seedance 2 Mini", "mediaType": "video", "modes": ["text", "reference"], "inputSlots": {"maxImages": 9, "maxVideos": 3}, "ratios": ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2"], "resolutions": ["480P", "720P"], "durations": [4, 8, 10, 12, 15]},
+        {"modelId": "seedance-2-fast", "displayName": "Seedance 2 Fast", "mediaType": "video", "modes": ["text", "first_frame", "first_last", "reference"], "inputSlots": {"maxImages": 9, "maxVideos": 3}, "ratios": ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2"], "resolutions": ["480P", "720P"], "durations": list(range(4, 16))},
+        {"modelId": "seedance-2", "displayName": "Seedance 2", "mediaType": "video", "modes": ["text", "first_frame", "first_last", "reference"], "inputSlots": {"maxImages": 9, "maxVideos": 3}, "ratios": ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2"], "resolutions": ["480P", "720P", "1080P", "4K"], "durations": list(range(4, 16))},
+    ],
+}

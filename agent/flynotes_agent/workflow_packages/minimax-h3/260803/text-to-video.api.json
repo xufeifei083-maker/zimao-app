@@ -1,0 +1,267 @@
+{
+  "119": {
+    "_meta": {
+      "title": "Load VAE"
+    },
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    }
+  },
+  "120": {
+    "_meta": {
+      "title": "Load VAE"
+    },
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "121": {
+    "_meta": {
+      "title": "VAE Decode Audio"
+    },
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "125",
+        0
+      ],
+      "vae": [
+        "120",
+        0
+      ]
+    }
+  },
+  "122": {
+    "_meta": {
+      "title": "VAE Decode"
+    },
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "125",
+        0
+      ],
+      "vae": [
+        "119",
+        0
+      ]
+    }
+  },
+  "123": {
+    "_meta": {
+      "title": "KSamplerSelect"
+    },
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "124": {
+    "_meta": {
+      "title": "BasicScheduler"
+    },
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1,
+      "model": [
+        "134",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20
+    }
+  },
+  "125": {
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "126",
+        0
+      ],
+      "latent_image": [
+        "131",
+        1
+      ],
+      "noise": [
+        "129",
+        0
+      ],
+      "sampler": [
+        "123",
+        0
+      ],
+      "sigmas": [
+        "124",
+        0
+      ]
+    }
+  },
+  "126": {
+    "_meta": {
+      "title": "Basic Guider"
+    },
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "131",
+        0
+      ],
+      "model": [
+        "134",
+        0
+      ]
+    }
+  },
+  "127": {
+    "_meta": {
+      "title": "Load Diffusion Model"
+    },
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "128": {
+    "_meta": {
+      "title": "Load CLIP"
+    },
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "129": {
+    "_meta": {
+      "title": "RandomNoise"
+    },
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 488468462501363
+    }
+  },
+  "130": {
+    "_meta": {
+      "title": "Create Video"
+    },
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "121",
+        0
+      ],
+      "bit_depth": 8,
+      "fps": 24,
+      "images": [
+        "122",
+        0
+      ]
+    }
+  },
+  "131": {
+    "_meta": {
+      "title": "MiniMax H3 Image to Video"
+    },
+    "class_type": "MiniMaxH3ImageToVideo",
+    "inputs": {
+      "clip": [
+        "128",
+        0
+      ],
+      "height": [
+        "136",
+        0
+      ],
+      "length": [
+        "132",
+        1
+      ],
+      "prompt": "Scene 1 (0–3s) – Luxury Reveal\nA luxury perfume bottle slowly emerges from darkness, standing on a glossy black pedestal. Soft golden light beams gradually reveal the crystal-clear glass, while subtle volumetric fog creates depth. Extreme macro shot, cinematic lighting, ultra-realistic reflections, premium luxury commercial aesthetic.\n\nScene 2 (3–6s) – Precision Details\nExtreme close-up of the perfume bottle as rich golden fragrance liquid gently swirls inside. The camera performs a smooth cinematic orbit, capturing intricate glass textures, flawless craftsmanship, and sparkling highlights. Ultra-detailed, photorealistic, premium commercial quality.\n\nScene 3 (6–9s) – AI Transformation\nThe perfume bottle seamlessly dissolves into glowing golden particles before instantly reforming into a futuristic luxury edition, maintaining perfect proportions and visual consistency. Dynamic orbit camera, seamless transformation, cinematic lighting, premium visual effects.\n\nScene 4 (9–12s) – Environment Transition\nWithout a single cut, the background transforms from a luxurious black studio into a futuristic neon metropolis. The perfume bottle remains perfectly consistent while the camera performs a dramatic dolly-in. Hyper-realistic, cinematic, high-end advertising style.\n\nScene 5 (12–15s) – Hero Finale\nSlow-motion hero shot of the luxury perfume bottle elegantly rotating as glowing golden particles float around it. Premium black background, flawless reflections, cinematic logo reveal, luxury commercial ending, 8K photorealistic, blockbuster advertising quality.",
+      "vae": [
+        "119",
+        0
+      ],
+      "width": [
+        "135",
+        0
+      ]
+    }
+  },
+  "132": {
+    "_meta": {
+      "title": "Math Expression"
+    },
+    "class_type": "ComfyMathExpression",
+    "inputs": {
+      "expression": "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17",
+      "values.a": [
+        "133",
+        0
+      ]
+    }
+  },
+  "133": {
+    "_meta": {
+      "title": "Float (duration)"
+    },
+    "class_type": "PrimitiveFloat",
+    "inputs": {
+      "value": 15
+    }
+  },
+  "134": {
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "inputs": {
+      "allow_compile": false,
+      "model": [
+        "127",
+        0
+      ],
+      "sage_attention": "auto"
+    }
+  },
+  "135": {
+    "_meta": {
+      "title": "WIDTH"
+    },
+    "class_type": "INTConstant",
+    "inputs": {
+      "value": 480
+    }
+  },
+  "136": {
+    "_meta": {
+      "title": "height"
+    },
+    "class_type": "INTConstant",
+    "inputs": {
+      "value": 832
+    }
+  },
+  "92": {
+    "_meta": {
+      "title": "Save Video"
+    },
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "video/MiniMax_H3",
+      "format": "auto",
+      "video": [
+        "130",
+        0
+      ],
+      "video-preview": ""
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "fixtureVersion": "2026.08.10.1",
+  "license": "CC0-1.0",
+  "description": "Synthetic, redistributable fixtures for the MiniMax H3 Blender E2E suite.",
+  "files": [
+    {
+      "path": "first_frame.png",
+      "sha256": "dbc95edac81fd71ae16eba8f9ee48917c7c8be74b1d0a5ef08c198a49ab3b7fe",
+      "mediaType": "image",
+      "width": 480,
+      "height": 832,
+      "role": "first_frame"
+    },
+    {
+      "path": "last_frame.png",
+      "sha256": "1aa3620d148a4f42dfd39ed89f38fcf1192435fa125aa5d2c601de93aed3e3c2",
+      "mediaType": "image",
+      "width": 480,
+      "height": 832,
+      "role": "last_frame"
+    },
+    {
+      "path": "reference_1.png",
+      "sha256": "7ab4186aa27161fe16ad38d52fd0589efb42a0e4dd1e9e48b52e8c1fdef05e25",
+      "mediaType": "image",
+      "width": 480,
+      "height": 832,
+      "role": "reference_image"
+    },
+    {
+      "path": "reference_2.png",
+      "sha256": "20a6008d5df16afc28dac63cd62ab58286d5ed72af6c6bd97766859e99eed08a",
+      "mediaType": "image",
+      "width": 480,
+      "height": 832,
+      "role": "reference_image"
+    },
+    {
+      "path": "reference_video.mp4",
+      "sha256": "9b48e167b6d1ef0209c4ecf8f82ce310dd8c9c76cc2acf904ab8c7d9fec36fe9",
+      "mediaType": "video",
+      "width": 480,
+      "height": 832,
+      "durationSeconds": 2.0,
+      "fps": 24,
+      "hasAudio": true,
+      "role": "reference_video"
+    },
+    {
+      "path": "reference_audio.wav",
+      "sha256": "c17c12f0c79fd2861d5003ff7f7608473f46315dfd8895eec8ccb136c71bf66f",
+      "mediaType": "audio",
+      "durationSeconds": 2.0,
+      "sampleRate": 48000,
+      "channels": 1,
+      "role": "reference_audio"
+    }
+  ]
+}

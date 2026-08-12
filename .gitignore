@@ -1,0 +1,27 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+node_modules/
+desktop/dist/
+desktop/src-tauri/target/
+desktop/src-tauri/resources/agent/*.exe
+
+.idea/
+.vscode/
+*.log
+*.pid
+
+data/
+test-results/
+
+# Catalog signing keys must never be committed.
+*.ed25519-private
+catalog/catalog.json.sig
