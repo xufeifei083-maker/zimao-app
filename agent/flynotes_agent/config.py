@@ -12,6 +12,10 @@ DEFAULT_WORKFLOW_CATALOG_URL = (
 )
 DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY = "r+yYk1hKvlN+mlhdxR8SzjvuvSHQ/Rtg6I7kScKj1GA="
 DEFAULT_RUNTIME_ID = "win-nvidia-h3-2026.08.2"
+DEFAULT_RUNTIME_MANIFEST_URL = (
+    "https://github.com/xufeifei083-maker/zimao-runtime/releases/download/"
+    "win-nvidia-h3-2026.08.2/runtime-manifest.json"
+)
 DEFAULT_RUNTIME_PUBLIC_KEY = "9JQPS+MURxHKkpRM05IC+98YgaXCzRd0W7efBCnRYrA="
 
 
@@ -56,7 +60,7 @@ class AgentConfig:
     workflow_catalog_url: str = DEFAULT_WORKFLOW_CATALOG_URL
     workflow_catalog_public_key: str = DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY
     runtime_id: str = DEFAULT_RUNTIME_ID
-    runtime_manifest_url: str = ""
+    runtime_manifest_url: str = DEFAULT_RUNTIME_MANIFEST_URL
     runtime_public_key: str = DEFAULT_RUNTIME_PUBLIC_KEY
 
     @classmethod
@@ -91,7 +95,9 @@ class AgentConfig:
                 DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY,
             ),
             runtime_id=os.environ.get("ZIMAO_RUNTIME_ID", DEFAULT_RUNTIME_ID),
-            runtime_manifest_url=os.environ.get("ZIMAO_RUNTIME_MANIFEST_URL", ""),
+            runtime_manifest_url=os.environ.get(
+                "ZIMAO_RUNTIME_MANIFEST_URL", DEFAULT_RUNTIME_MANIFEST_URL
+            ),
             runtime_public_key=os.environ.get(
                 "ZIMAO_RUNTIME_PUBLIC_KEY", DEFAULT_RUNTIME_PUBLIC_KEY
             ),
