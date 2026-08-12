@@ -11,7 +11,7 @@ FORBIDDEN_MARKERS = {
     "walkingwithai": "旧整合包目录或品牌",
     "gradio_minimax_h3": "旧整合包自定义 Gradio 模块",
     "t.zsxq.com": "知识星球推广链接",
-    "ai.feishu.cn": "旧整合包飞书链接",
+    "ai.feishu.cn/wiki/ohmewjkhbinj4aksaoccyfbznob": "旧整合包飞书链接",
     "最强ai视频": "旧整合包名称",
     "minimaxh3-v260803": "旧整合包构建路径",
     "users\\23122": "发布机用户路径",

@@ -6,10 +6,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_COMFY_ROOT = Path(
-    r"E:\comfyui\最强AI视频生成-Minimax-H3整合包"
-    r"\MinimaxH3-v260803.7z\MinimaxH3-v260803"
-)
 DEFAULT_WORKFLOW_CATALOG_URL = (
     "https://raw.githubusercontent.com/xufeifei083-maker/"
     "zimao-workflows/catalog-260803-1/catalog/catalog.json"
@@ -26,6 +22,9 @@ def _default_data_root() -> Path:
     return Path.home() / ".flynotes-ai"
 
 
+DEFAULT_COMFY_ROOT = _default_data_root() / "runtimes" / DEFAULT_RUNTIME_ID
+
+
 def _resolved_comfy_root(data_root: Path) -> Path:
     explicit = os.environ.get("FLYNOTES_COMFY_ROOT")
     if explicit:
@@ -38,8 +37,6 @@ def _resolved_comfy_root(data_root: Path) -> Path:
             return candidate
     except (OSError, json.JSONDecodeError, KeyError, TypeError):
         pass
-    if DEFAULT_COMFY_ROOT.is_dir():
-        return DEFAULT_COMFY_ROOT
     return data_root / "runtimes" / DEFAULT_RUNTIME_ID
 
 

@@ -75,6 +75,8 @@ def build(args: argparse.Namespace) -> None:
     source = args.source.resolve()
     required_licenses = [
         source / "LICENSE",
+        source / "python_runtime" / "LICENSE.txt",
+        source / "ffmpeg" / "LICENSE.txt",
         source / "custom_nodes" / "comfyui-kjnodes" / "LICENSE",
         source / "custom_nodes" / "comfyui-videohelpersuite" / "LICENSE",
     ]
