@@ -45,7 +45,7 @@ python -m venv .venv
 
 Local Agent 不启动 Gradio，也不访问 7860；它直接连接 `http://127.0.0.1:8188`。如果 8188 当前由旧 `start.py` 启动，状态会显示为 `warning` 且禁止误停该外部进程。
 
-工作流模型统一保存到 `%LOCALAPPDATA%\FlynotesAI\models`，Agent 会生成 ComfyUI `extra_model_paths` 配置，不会复制同一份大模型。公开目录发布后配置：
+工作流模型统一保存到 `%LOCALAPPDATA%\FlynotesAI\models`，Agent 会生成 ComfyUI `extra_model_paths` 配置，不会复制同一份大模型。正式版本已内置紫猫公开目录地址和 Ed25519 公钥；开发环境需要覆盖时可以配置：
 
 ```powershell
 $env:ZIMAO_WORKFLOW_CATALOG_URL="https://raw.githubusercontent.com/xufeifei083-maker/zimao-workflows/main/catalog/catalog.json"

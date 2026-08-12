@@ -9,6 +9,11 @@ DEFAULT_COMFY_ROOT = Path(
     r"E:\comfyui\最强AI视频生成-Minimax-H3整合包"
     r"\MinimaxH3-v260803.7z\MinimaxH3-v260803"
 )
+DEFAULT_WORKFLOW_CATALOG_URL = (
+    "https://raw.githubusercontent.com/xufeifei083-maker/"
+    "zimao-workflows/main/catalog/catalog.json"
+)
+DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY = "r+yYk1hKvlN+mlhdxR8SzjvuvSHQ/Rtg6I7kScKj1GA="
 
 
 def _default_data_root() -> Path:
@@ -31,8 +36,8 @@ class AgentConfig:
     flynotes_base_url: str = "https://flynotes.top/api/v1"
     plugin_repository: str = ""
     plugin_public_key: str = ""
-    workflow_catalog_url: str = ""
-    workflow_catalog_public_key: str = ""
+    workflow_catalog_url: str = DEFAULT_WORKFLOW_CATALOG_URL
+    workflow_catalog_public_key: str = DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY
 
     @classmethod
     def from_env(cls) -> "AgentConfig":
@@ -59,9 +64,12 @@ class AgentConfig:
             ).rstrip("/"),
             plugin_repository=os.environ.get("FLYNOTES_PLUGIN_REPOSITORY", ""),
             plugin_public_key=os.environ.get("FLYNOTES_PLUGIN_PUBLIC_KEY", ""),
-            workflow_catalog_url=os.environ.get("ZIMAO_WORKFLOW_CATALOG_URL", ""),
+            workflow_catalog_url=os.environ.get(
+                "ZIMAO_WORKFLOW_CATALOG_URL", DEFAULT_WORKFLOW_CATALOG_URL
+            ),
             workflow_catalog_public_key=os.environ.get(
-                "ZIMAO_WORKFLOW_CATALOG_PUBLIC_KEY", ""
+                "ZIMAO_WORKFLOW_CATALOG_PUBLIC_KEY",
+                DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY,
             ),
         )
 
