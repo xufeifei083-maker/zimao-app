@@ -1,4 +1,4 @@
-# Flynotes Local AI Control Center
+# 紫猫（Zimao）本地 AI 工作流中心
 
 本仓库实现《本地 AI 控制中心 PRD 与开发验收文档》中定义的桌面控制中心、Python Local Agent、H3 工作流适配和 Blender 插件集成。
 
