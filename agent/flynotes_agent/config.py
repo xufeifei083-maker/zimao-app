@@ -15,7 +15,7 @@ DEFAULT_WORKFLOW_CATALOG_URL = (
     "zimao-workflows/catalog-260803-1/catalog/catalog.json"
 )
 DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY = "r+yYk1hKvlN+mlhdxR8SzjvuvSHQ/Rtg6I7kScKj1GA="
-DEFAULT_RUNTIME_ID = "win-nvidia-h3-2026.08.1"
+DEFAULT_RUNTIME_ID = "win-nvidia-h3-2026.08.2"
 DEFAULT_RUNTIME_PUBLIC_KEY = "9JQPS+MURxHKkpRM05IC+98YgaXCzRd0W7efBCnRYrA="
 
 
@@ -110,7 +110,7 @@ class AgentConfig:
 
     @property
     def comfy_python(self) -> Path:
-        return self.comfy_root / "walkingwithai" / "python.exe"
+        return self.comfy_root / "python_runtime" / "python.exe"
 
     @property
     def comfy_main(self) -> Path:

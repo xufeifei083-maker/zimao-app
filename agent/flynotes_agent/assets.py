@@ -61,11 +61,11 @@ class AssetStore:
 
     @property
     def ffprobe(self) -> Path:
-        return self.config.comfy_root / "walkingwithai" / "ffmpeg" / "bin" / "ffprobe.exe"
+        return self.config.comfy_root / "ffmpeg" / "bin" / "ffprobe.exe"
 
     @property
     def ffmpeg(self) -> Path:
-        return self.config.comfy_root / "walkingwithai" / "ffmpeg" / "bin" / "ffmpeg.exe"
+        return self.config.comfy_root / "ffmpeg" / "bin" / "ffmpeg.exe"
 
     @staticmethod
     def _sha256(path: Path) -> str:

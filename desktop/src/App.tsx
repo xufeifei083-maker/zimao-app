@@ -88,7 +88,7 @@ const emptySystemMetrics: SystemMetrics = {
 };
 
 const emptyRuntimePackage: RuntimePackageStatus = {
-  runtimeId: "win-nvidia-h3-2026.08.1", state: "not_installed", configured: false,
+  runtimeId: "win-nvidia-h3-2026.08.2", state: "not_installed", configured: false,
   manifestUrl: "", installPath: "", downloadedBytes: 0, totalBytes: 0,
   progressPercent: 0, errorCode: "", errorMessage: "",
 };

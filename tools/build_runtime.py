@@ -12,15 +12,22 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from audit_runtime import audit
+
 
 EXCLUDED_ROOTS = {
+    ".ci",
     ".git",
+    ".github",
     "models",
     "input",
     "output",
     "temp",
     "user",
     "custom_nodes",
+    "script_examples",
+    "tests",
+    "tests-unit",
 }
 INCLUDED_CUSTOM_NODES = {"comfyui-kjnodes", "comfyui-videohelpersuite"}
 EXCLUDED_NAMES = {"__pycache__", ".pytest_cache"}
@@ -66,6 +73,20 @@ def _sha256(path: Path) -> str:
 
 def build(args: argparse.Namespace) -> None:
     source = args.source.resolve()
+    required_licenses = [
+        source / "LICENSE",
+        source / "custom_nodes" / "comfyui-kjnodes" / "LICENSE",
+        source / "custom_nodes" / "comfyui-videohelpersuite" / "LICENSE",
+    ]
+    missing_licenses = [str(path.relative_to(source)) for path in required_licenses if not path.is_file()]
+    if missing_licenses:
+        raise RuntimeError(f"Runtime 缺少必需许可证：{', '.join(missing_licenses)}")
+    findings = audit(source)
+    if findings:
+        summary = "\n".join(
+            f"{finding.path}: {finding.reason} ({finding.marker})" for finding in findings[:20]
+        )
+        raise RuntimeError(f"Runtime 品牌与路径审计失败，共 {len(findings)} 项：\n{summary}")
     files = _included_files(source)
     source_bytes = sum(path.stat().st_size for path in files)
     inventory = {
@@ -124,7 +145,12 @@ def build(args: argparse.Namespace) -> None:
         "minimumDriver": args.minimum_driver,
         "archiveSize": archive_size,
         "archiveSha256": archive_sha256,
-        "requiredFiles": ["main.py", "walkingwithai/python.exe"],
+        "requiredFiles": [
+            "main.py",
+            "python_runtime/python.exe",
+            "ffmpeg/bin/ffmpeg.exe",
+            "ffmpeg/bin/ffprobe.exe",
+        ],
         "parts": parts,
     }
     payload = json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8") + b"\n"
@@ -141,15 +167,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build the fixed Zimao Windows NVIDIA runtime")
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=Path("dist/runtime"))
-    parser.add_argument("--runtime-id", default="win-nvidia-h3-2026.08.1")
+    parser.add_argument("--runtime-id", default="win-nvidia-h3-2026.08.2")
     parser.add_argument("--base-url", default="")
     parser.add_argument("--private-key", type=Path)
     parser.add_argument("--part-size", type=int, default=1900 * 1024 * 1024)
-    parser.add_argument("--python-version", default="3.12.12")
+    parser.add_argument("--python-version", default="3.12.10")
     parser.add_argument("--comfyui-commit", default="14b05228cef127ce529bc0c08660770d4af3e9a8")
     parser.add_argument("--pytorch-version", default="2.12.1+cu130")
     parser.add_argument("--cuda-version", default="13.0")
-    parser.add_argument("--ffmpeg-version", default="2025-06-26-git-09cd38e9d5")
+    parser.add_argument("--ffmpeg-version", required=not any(value == "--dry-run" for value in os.sys.argv))
     parser.add_argument("--minimum-driver", default="580.00")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

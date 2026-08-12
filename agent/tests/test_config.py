@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 def test_config_builds_expected_runtime_paths(config) -> None:
-    assert config.comfy_python == config.comfy_root / "walkingwithai" / "python.exe"
+    assert config.comfy_python == config.comfy_root / "python_runtime" / "python.exe"
     assert config.comfy_main == config.comfy_root / "main.py"
     assert config.comfy_base_url == "http://127.0.0.1:8188"
     assert config.runtime_validation_errors() == []

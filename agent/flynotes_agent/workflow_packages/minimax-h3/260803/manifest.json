@@ -4,7 +4,7 @@
   "displayName": "MiniMax H3（本地）",
   "provider": "comfyui",
   "description": "支持文生、首帧、首尾帧和全能参考的视频生成工作流",
-  "runtimeVersion": "win-nvidia-h3-2026.08.1",
+  "runtimeVersion": "win-nvidia-h3-2026.08.2",
   "hardware": {
     "gpuVendor": "nvidia",
     "minimumVramGB": 8,

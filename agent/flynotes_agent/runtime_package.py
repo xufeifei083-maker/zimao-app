@@ -48,7 +48,7 @@ class RuntimeManifest(BaseModel):
     minimumDriver: str
     archiveSize: int = Field(gt=0)
     archiveSha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    requiredFiles: list[str] = Field(default_factory=lambda: ["main.py", "walkingwithai/python.exe"])
+    requiredFiles: list[str] = Field(default_factory=lambda: ["main.py", "python_runtime/python.exe"])
     parts: list[RuntimePart] = Field(min_length=1)
 
 

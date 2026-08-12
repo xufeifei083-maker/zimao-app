@@ -22,7 +22,7 @@ def _runtime_archive() -> bytes:
     output = io.BytesIO()
     with zipfile.ZipFile(output, "w") as bundle:
         bundle.writestr("main.py", "# fixed runtime")
-        bundle.writestr("walkingwithai/python.exe", b"test-python")
+        bundle.writestr("python_runtime/python.exe", b"test-python")
     return output.getvalue()
 
 
@@ -47,7 +47,7 @@ async def test_runtime_package_downloads_verifies_and_activates(config, tmp_path
         "minimumDriver": "580.00",
         "archiveSize": len(archive),
         "archiveSha256": hashlib.sha256(archive).hexdigest(),
-        "requiredFiles": ["main.py", "walkingwithai/python.exe"],
+        "requiredFiles": ["main.py", "python_runtime/python.exe"],
         "parts": [
             {
                 "name": "runtime-win-nvidia-test-1.part01",
@@ -87,7 +87,7 @@ async def test_runtime_package_downloads_verifies_and_activates(config, tmp_path
     assert status.state == RuntimePackageState.READY
     assert resolved.comfy_root == resolved.runtimes_path / runtime_id
     assert (resolved.comfy_root / "main.py").is_file()
-    assert (resolved.comfy_root / "walkingwithai" / "python.exe").is_file()
+    assert (resolved.comfy_root / "python_runtime" / "python.exe").is_file()
     pointer = json.loads(resolved.runtime_pointer_path.read_text(encoding="utf-8"))
     assert pointer["runtimeId"] == runtime_id
 

@@ -118,8 +118,7 @@ class ComfyRuntimeManager:
             }
         )
         extra_path = [
-            str(root / "walkingwithai" / "Git" / "bin"),
-            str(root / "walkingwithai" / "ffmpeg" / "bin"),
+            str(root / "ffmpeg" / "bin"),
         ]
         env["PATH"] = os.pathsep.join(extra_path + [env.get("PATH", "")])
         return env
