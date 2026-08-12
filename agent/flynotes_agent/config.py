@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,6 +15,8 @@ DEFAULT_WORKFLOW_CATALOG_URL = (
     "zimao-workflows/catalog-260803-1/catalog/catalog.json"
 )
 DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY = "r+yYk1hKvlN+mlhdxR8SzjvuvSHQ/Rtg6I7kScKj1GA="
+DEFAULT_RUNTIME_ID = "win-nvidia-h3-2026.08.1"
+DEFAULT_RUNTIME_PUBLIC_KEY = "9JQPS+MURxHKkpRM05IC+98YgaXCzRd0W7efBCnRYrA="
 
 
 def _default_data_root() -> Path:
@@ -23,7 +26,24 @@ def _default_data_root() -> Path:
     return Path.home() / ".flynotes-ai"
 
 
-@dataclass(frozen=True, slots=True)
+def _resolved_comfy_root(data_root: Path) -> Path:
+    explicit = os.environ.get("FLYNOTES_COMFY_ROOT")
+    if explicit:
+        return Path(explicit)
+    pointer = data_root / "runtimes" / "current.json"
+    try:
+        value = json.loads(pointer.read_text(encoding="utf-8"))
+        candidate = Path(value["path"])
+        if candidate.is_dir():
+            return candidate
+    except (OSError, json.JSONDecodeError, KeyError, TypeError):
+        pass
+    if DEFAULT_COMFY_ROOT.is_dir():
+        return DEFAULT_COMFY_ROOT
+    return data_root / "runtimes" / DEFAULT_RUNTIME_ID
+
+
+@dataclass(slots=True)
 class AgentConfig:
     host: str = "127.0.0.1"
     port: int = 17980
@@ -38,20 +58,22 @@ class AgentConfig:
     plugin_public_key: str = ""
     workflow_catalog_url: str = DEFAULT_WORKFLOW_CATALOG_URL
     workflow_catalog_public_key: str = DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY
+    runtime_id: str = DEFAULT_RUNTIME_ID
+    runtime_manifest_url: str = ""
+    runtime_public_key: str = DEFAULT_RUNTIME_PUBLIC_KEY
 
     @classmethod
     def from_env(cls) -> "AgentConfig":
+        data_root = Path(
+            os.environ.get("FLYNOTES_DATA_ROOT", str(_default_data_root()))
+        )
         return cls(
             host=os.environ.get("FLYNOTES_AGENT_HOST", "127.0.0.1"),
             port=int(os.environ.get("FLYNOTES_AGENT_PORT", "17980")),
             comfy_host=os.environ.get("FLYNOTES_COMFY_HOST", "127.0.0.1"),
             comfy_port=int(os.environ.get("FLYNOTES_COMFY_PORT", "8188")),
-            comfy_root=Path(
-                os.environ.get("FLYNOTES_COMFY_ROOT", str(DEFAULT_COMFY_ROOT))
-            ),
-            data_root=Path(
-                os.environ.get("FLYNOTES_DATA_ROOT", str(_default_data_root()))
-            ),
+            comfy_root=_resolved_comfy_root(data_root),
+            data_root=data_root,
             comfy_start_timeout_seconds=float(
                 os.environ.get("FLYNOTES_COMFY_START_TIMEOUT", "90")
             ),
@@ -70,6 +92,11 @@ class AgentConfig:
             workflow_catalog_public_key=os.environ.get(
                 "ZIMAO_WORKFLOW_CATALOG_PUBLIC_KEY",
                 DEFAULT_WORKFLOW_CATALOG_PUBLIC_KEY,
+            ),
+            runtime_id=os.environ.get("ZIMAO_RUNTIME_ID", DEFAULT_RUNTIME_ID),
+            runtime_manifest_url=os.environ.get("ZIMAO_RUNTIME_MANIFEST_URL", ""),
+            runtime_public_key=os.environ.get(
+                "ZIMAO_RUNTIME_PUBLIC_KEY", DEFAULT_RUNTIME_PUBLIC_KEY
             ),
         )
 
@@ -138,6 +165,32 @@ class AgentConfig:
         return self.data_root / "catalog" / "catalog.json"
 
     @property
+    def runtimes_path(self) -> Path:
+        return self.data_root / "runtimes"
+
+    @property
+    def runtime_downloads_path(self) -> Path:
+        return self.data_root / "downloads" / "runtime"
+
+    @property
+    def runtime_pointer_path(self) -> Path:
+        return self.runtimes_path / "current.json"
+
+    def activate_runtime(self, runtime_id: str, path: Path) -> None:
+        resolved = path.resolve()
+        try:
+            resolved.relative_to(self.runtimes_path.resolve())
+        except ValueError as error:
+            raise ValueError("Runtime path must stay inside the managed runtimes directory") from error
+        temporary = self.runtime_pointer_path.with_suffix(".tmp")
+        temporary.write_text(
+            json.dumps({"runtimeId": runtime_id, "path": str(resolved)}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        os.replace(temporary, self.runtime_pointer_path)
+        self.comfy_root = resolved
+
+    @property
     def workflow_install_state_path(self) -> Path:
         return self.data_root / "downloads" / "workflow-installations.json"
 
@@ -176,6 +229,8 @@ class AgentConfig:
             self.models_path,
             self.catalog_cache_path.parent,
             self.workflow_install_state_path.parent,
+            self.runtimes_path,
+            self.runtime_downloads_path,
         ):
             path.mkdir(parents=True, exist_ok=True)
         self.write_extra_model_paths_config()

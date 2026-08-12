@@ -494,6 +494,22 @@ Manifest 是工作流安装和验证的唯一权威清单。
 - 基础自定义节点和 Python 包。
 - 固定启动参数。
 
+首版 `win-nvidia-h3-2026.08.1` 已按当前通过 H3 验收的环境冻结：
+
+| 组件 | 固定版本 |
+|---|---|
+| Python | 3.12.12 |
+| ComfyUI | commit `14b05228cef127ce529bc0c08660770d4af3e9a8` |
+| PyTorch | 2.12.1+cu130 |
+| torchvision | 0.27.1+cu130 |
+| torchaudio | 2.11.0+cu130 |
+| CUDA Runtime | 13.0 |
+| cuDNN | 92000 |
+| FFmpeg | 2025-06-26-git-09cd38e9d5 |
+| H3 第三方节点 | `comfyui-kjnodes`、`comfyui-videohelpersuite` 固定内容哈希 |
+
+模型、用户输入输出和其他无关节点不进入 Runtime。当前构建清单为 84,700 个文件、约 7.29 GB 未压缩数据；模型继续由工作流 Manifest 引用 Hugging Face。
+
 Runtime ID 示例：
 
 ```text

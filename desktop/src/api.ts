@@ -19,6 +19,19 @@ export interface RuntimeStatus {
   message: string;
 }
 
+export interface RuntimePackageStatus {
+  runtimeId: string;
+  state: "not_installed" | "downloading" | "verifying" | "installing" | "ready" | "failed";
+  configured: boolean;
+  manifestUrl: string;
+  installPath: string;
+  downloadedBytes: number;
+  totalBytes: number;
+  progressPercent: number;
+  errorCode: string;
+  errorMessage: string;
+}
+
 export interface GpuStats {
   index: number;
   name: string;
@@ -219,6 +232,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const agentApi = {
   ensureAgent: () => invoke<void>("start_agent"),
   runtime: () => request<RuntimeStatus>("/v1/runtime/comfyui"),
+  runtimePackage: () => request<RuntimePackageStatus>("/v1/runtime/package"),
   runtimeAction: (action: "start" | "stop" | "restart") => request<RuntimeStatus>(`/v1/runtime/comfyui/${action}`, { method: "POST" }),
   systemMetrics: () => request<SystemMetrics>("/v1/system/metrics"),
   models: () => request<ModelSpec[]>("/v1/models"),

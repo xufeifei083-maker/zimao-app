@@ -20,7 +20,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { agentApi, Asset, Job, LogResponse, ModelSpec, PluginStatus, RuntimeStatus, SystemMetrics, WorkflowInstallOperation, WorkflowStatus } from "./api";
+import { agentApi, Asset, Job, LogResponse, ModelSpec, PluginStatus, RuntimePackageStatus, RuntimeStatus, SystemMetrics, WorkflowInstallOperation, WorkflowStatus } from "./api";
 
 type Tab = "service" | "workflows" | "generate" | "library" | "plugins";
 
@@ -87,9 +87,16 @@ const emptySystemMetrics: SystemMetrics = {
   updatedAt: "",
 };
 
+const emptyRuntimePackage: RuntimePackageStatus = {
+  runtimeId: "win-nvidia-h3-2026.08.1", state: "not_installed", configured: false,
+  manifestUrl: "", installPath: "", downloadedBytes: 0, totalBytes: 0,
+  progressPercent: 0, errorCode: "", errorMessage: "",
+};
+
 export default function App() {
   const [tab, setTab] = useState<Tab>("service");
   const [runtime, setRuntime] = useState<RuntimeStatus>(emptyRuntime);
+  const [runtimePackage, setRuntimePackage] = useState<RuntimePackageStatus>(emptyRuntimePackage);
   const [models, setModels] = useState<ModelSpec[]>([]);
   const [workflows, setWorkflows] = useState<WorkflowStatus[]>([]);
   const [downloads, setDownloads] = useState<WorkflowInstallOperation[]>([]);
@@ -109,8 +116,8 @@ export default function App() {
       const nextRuntime = await agentApi.runtime();
       setRuntime(nextRuntime);
       setConnected(true);
-      const [models, workflows, downloads, jobs, assets, plugins, logs, systemMetrics] = await Promise.allSettled([
-        agentApi.models(), agentApi.workflows(), agentApi.downloads(), agentApi.jobs(), agentApi.assets(), agentApi.plugins(), agentApi.logs(), agentApi.systemMetrics(),
+      const [models, workflows, downloads, jobs, assets, plugins, logs, systemMetrics, runtimePackage] = await Promise.allSettled([
+        agentApi.models(), agentApi.workflows(), agentApi.downloads(), agentApi.jobs(), agentApi.assets(), agentApi.plugins(), agentApi.logs(), agentApi.systemMetrics(), agentApi.runtimePackage(),
       ]);
       if (models.status === "fulfilled") setModels(models.value);
       if (workflows.status === "fulfilled") setWorkflows(workflows.value);
@@ -120,6 +127,7 @@ export default function App() {
       if (plugins.status === "fulfilled") setPlugins(plugins.value);
       if (logs.status === "fulfilled") setLogs(logs.value);
       if (systemMetrics.status === "fulfilled") setSystemMetrics(systemMetrics.value);
+      if (runtimePackage.status === "fulfilled") setRuntimePackage(runtimePackage.value);
     } catch {
       setConnected(false);
     }
@@ -159,7 +167,7 @@ export default function App() {
       <main>
         <header className="topbar"><div><span className="eyebrow">LOCAL AI WORKSPACE</span><h1>{tabs.find((item) => item.id === tab)?.label}</h1></div><div className="top-status"><StatusPill online={connected} label={connected ? "Agent 在线" : "Agent 离线"} /><StatusPill online={["ready", "warning"].includes(runtime.state)} label={`ComfyUI ${stateLabels[runtime.state]}`} warn={runtime.state === "warning"} /><div className="queue-count"><Layers3 size={15} /><b>{pending}</b><span>任务</span></div></div></header>
         <div className="content">
-          {tab === "service" && <ServicePanel runtime={runtime} connected={connected} logs={logs} systemMetrics={systemMetrics} refresh={refresh} notify={setToast} />}
+          {tab === "service" && <ServicePanel runtime={runtime} runtimePackage={runtimePackage} connected={connected} logs={logs} systemMetrics={systemMetrics} refresh={refresh} notify={setToast} />}
           {tab === "workflows" && <WorkflowCenter workflows={workflows} downloads={downloads} refresh={refresh} notify={setToast} useWorkflow={() => setTab("generate")} />}
           {tab === "generate" && <GeneratePanel models={models} runtime={runtime} notify={setToast} created={() => { void refresh(); setTab("library"); }} />}
           {tab === "library" && <LibraryPanel assets={assets} jobs={jobs} refresh={refresh} notify={setToast} />}
@@ -274,7 +282,7 @@ function WorkflowCenter({ workflows, downloads, refresh, notify, useWorkflow }: 
   </section>;
 }
 
-function ServicePanel({ runtime, connected, logs, systemMetrics, refresh, notify }: { runtime: RuntimeStatus; connected: boolean; logs: LogResponse; systemMetrics: SystemMetrics; refresh: () => Promise<void>; notify: (text: string) => void }) {
+function ServicePanel({ runtime, runtimePackage, connected, logs, systemMetrics, refresh, notify }: { runtime: RuntimeStatus; runtimePackage: RuntimePackageStatus; connected: boolean; logs: LogResponse; systemMetrics: SystemMetrics; refresh: () => Promise<void>; notify: (text: string) => void }) {
   const [busy, setBusy] = useState("");
   const action = async (name: "start" | "stop" | "restart") => {
     setBusy(name);
@@ -305,9 +313,9 @@ function ServicePanel({ runtime, connected, logs, systemMetrics, refresh, notify
   return <section className="stack">
     <div className="hero-card"><div className="hero-orb"><Cpu size={32} /></div><div className="hero-copy"><div className="title-row"><h2>ComfyUI Runtime</h2><span className={`runtime-badge ${runtime.state}`}>{stateLabels[runtime.state]}</span></div><p>{connected ? runtime.message : "点击“启动全部服务”，系统会先启动 Local Agent，再启动 ComfyUI。"}</p><div className="runtime-actions"><button className="primary" disabled={ready || Boolean(busy)} onClick={() => void action("start")}><Play size={16} />{busy === "start" ? "正在启动…" : "启动全部服务"}</button><button disabled={!ready || !runtime.managed || Boolean(busy)} onClick={() => void action("stop")}><CircleStop size={16} />停止</button><button disabled={!ready || !runtime.managed || Boolean(busy)} onClick={() => void action("restart")}><RotateCw className={busy === "restart" ? "spin" : ""} size={16} />重启</button></div></div></div>
     {(runtime.errors.length > 0 || runtime.warnings.length > 0) && <div className={runtime.errors.length ? "notice error" : "notice warning"}><Activity size={18} /><div><strong>{runtime.errors.length ? "运行异常" : "运行警告"}</strong><p>{[...runtime.errors, ...runtime.warnings].join("；")}</p></div></div>}
-    <div className="metric-grid"><Metric icon={Activity} label="运行状态" value={stateLabels[runtime.state]} meta={runtime.managed ? "由控制中心托管" : "外部进程保护中"} /><Metric icon={Cpu} label="进程" value={runtime.pid ? `PID ${runtime.pid}` : "未运行"} meta={runtime.comfyVersion ? `ComfyUI ${runtime.comfyVersion}` : "等待版本检测"} /><Metric icon={Layers3} label="任务队列" value={`${runtime.queueRunning} 运行 / ${runtime.queuePending} 等待`} meta="桌面端与 Blender 共用" /><Metric icon={HardDrive} label="本地工作流" value="MiniMax H3" meta="260803 · 本地" /></div>
+    <div className="metric-grid"><Metric icon={Activity} label="运行状态" value={stateLabels[runtime.state]} meta={runtime.managed ? "由控制中心托管" : "外部进程保护中"} /><Metric icon={Cpu} label="进程" value={runtime.pid ? `PID ${runtime.pid}` : "未运行"} meta={runtime.comfyVersion ? `ComfyUI ${runtime.comfyVersion}` : "等待版本检测"} /><Metric icon={Layers3} label="任务队列" value={`${runtime.queueRunning} 运行 / ${runtime.queuePending} 等待`} meta="桌面端与 Blender 共用" /><Metric icon={HardDrive} label="固定 Runtime" value={runtimePackage.state === "ready" ? "已就绪" : runtimePackage.state === "downloading" ? `${runtimePackage.progressPercent.toFixed(1)}%` : "等待安装"} meta={runtimePackage.runtimeId} /></div>
     <SystemResourcePanel metrics={systemMetrics} />
-    <div className="split-grid"><div className="panel-card"><div className="panel-heading"><div><span className="eyebrow">ENVIRONMENT</span><h3>运行环境</h3></div><button className="icon-button" onClick={() => void refresh()}><RefreshCw size={16} /></button></div><dl className="details"><dt>服务地址</dt><dd>{runtime.baseUrl}</dd><dt>整合包路径</dt><dd title={runtime.root}>{runtime.root}</dd><dt>进程归属</dt><dd>{runtime.managed ? "Local Agent" : "未托管"}</dd><dt>Gradio 7860</dt><dd className="good">不启动、不访问</dd></dl></div><div className="panel-card terminal-card"><div className="panel-heading"><div><span className="eyebrow">LIVE LOG</span><h3>ComfyUI 日志</h3></div><span className="live-label"><i />LIVE</span></div><div className="terminal">{logs.lines.slice(-12).map((line, index) => <p key={`${index}-${line}`}><span>Runtime</span> {line}</p>)}</div></div></div>
+    <div className="split-grid"><div className="panel-card"><div className="panel-heading"><div><span className="eyebrow">ENVIRONMENT</span><h3>运行环境</h3></div><button className="icon-button" onClick={() => void refresh()}><RefreshCw size={16} /></button></div><dl className="details"><dt>服务地址</dt><dd>{runtime.baseUrl}</dd><dt>Runtime ID</dt><dd>{runtimePackage.runtimeId}</dd><dt>安装路径</dt><dd title={runtimePackage.installPath || runtime.root}>{runtimePackage.installPath || runtime.root}</dd><dt>进程归属</dt><dd>{runtime.managed ? "Local Agent" : "未托管"}</dd><dt>Gradio 7860</dt><dd className="good">不启动、不访问</dd></dl></div><div className="panel-card terminal-card"><div className="panel-heading"><div><span className="eyebrow">LIVE LOG</span><h3>ComfyUI 日志</h3></div><span className="live-label"><i />LIVE</span></div><div className="terminal">{logs.lines.slice(-12).map((line, index) => <p key={`${index}-${line}`}><span>Runtime</span> {line}</p>)}</div></div></div>
   </section>;
 }
 

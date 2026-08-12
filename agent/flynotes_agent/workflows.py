@@ -371,8 +371,13 @@ class WorkflowManager:
         if missing and not workflow.canInstall:
             errors.append("当前工作流资源尚未配置固定下载来源")
         runtime_errors = self.config.runtime_validation_errors()
-        if runtime_errors:
+        runtime_installable = bool(
+            self.config.runtime_manifest_url and self.config.runtime_public_key
+        )
+        if runtime_errors and not runtime_installable:
             errors.extend(runtime_errors)
+        elif runtime_errors:
+            workflow.hardwareWarnings.append("将先安装紫猫固定 Runtime")
         return WorkflowInstallPlanResponse(
             workflowId=workflow.id,
             workflowVersion=workflow.version,
@@ -386,6 +391,6 @@ class WorkflowManager:
             canInstall=(
                 workflow.canInstall
                 and workflow.hardwareCompatible
-                and not runtime_errors
+                and (not runtime_errors or runtime_installable)
             ),
         )

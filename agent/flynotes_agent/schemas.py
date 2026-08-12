@@ -300,3 +300,25 @@ class WorkflowCatalogStatusResponse(BaseModel):
     lastSyncedAt: datetime | None = None
     errorCode: str = ""
     errorMessage: str = ""
+
+
+class RuntimePackageState(StrEnum):
+    NOT_INSTALLED = "not_installed"
+    DOWNLOADING = "downloading"
+    VERIFYING = "verifying"
+    INSTALLING = "installing"
+    READY = "ready"
+    FAILED = "failed"
+
+
+class RuntimePackageStatusResponse(BaseModel):
+    runtimeId: str
+    state: RuntimePackageState
+    configured: bool
+    manifestUrl: str = ""
+    installPath: str = ""
+    downloadedBytes: int = 0
+    totalBytes: int = 0
+    progressPercent: float = 0
+    errorCode: str = ""
+    errorMessage: str = ""

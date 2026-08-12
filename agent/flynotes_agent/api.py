@@ -46,12 +46,14 @@ from .schemas import (
     WorkflowInstallPlanResponse,
     WorkflowStatusResponse,
     WorkflowCatalogStatusResponse,
+    RuntimePackageStatusResponse,
 )
 from .uploads import UploadStore
 from .worker import JobWorker
 from .workflows import WorkflowManager
 from .installer import WorkflowInstaller, WorkflowInstallError
 from .catalog import CatalogError, WorkflowCatalogManager
+from .runtime_package import RuntimePackageManager
 
 
 def _is_within(path: Path, root: Path) -> bool:
@@ -75,6 +77,7 @@ def create_app(
     workflow_manager: WorkflowManager | None = None,
     workflow_installer: WorkflowInstaller | None = None,
     workflow_catalog_manager: WorkflowCatalogManager | None = None,
+    runtime_package_manager: RuntimePackageManager | None = None,
     enable_worker: bool = True,
 ) -> FastAPI:
     resolved_config = config or AgentConfig.from_env()
@@ -87,8 +90,13 @@ def create_app(
     resolved_asset_store = asset_store or AssetStore(resolved_config)
     resolved_plugin_manager = plugin_manager or PluginManager(resolved_config)
     resolved_workflow_manager = workflow_manager or WorkflowManager(resolved_config)
+    resolved_runtime_package_manager = runtime_package_manager or RuntimePackageManager(
+        resolved_config
+    )
     resolved_workflow_installer = workflow_installer or WorkflowInstaller(
-        resolved_workflow_manager, resolved_runtime
+        resolved_workflow_manager,
+        resolved_runtime,
+        runtime_package_manager=resolved_runtime_package_manager,
     )
     resolved_workflow_catalog_manager = workflow_catalog_manager or WorkflowCatalogManager(
         resolved_config
@@ -158,6 +166,7 @@ def create_app(
     app.state.workflow_manager = resolved_workflow_manager
     app.state.workflow_installer = resolved_workflow_installer
     app.state.workflow_catalog_manager = resolved_workflow_catalog_manager
+    app.state.runtime_package_manager = resolved_runtime_package_manager
 
     @app.get("/v1/health", response_model=HealthResponse)
     async def health() -> HealthResponse:
@@ -167,6 +176,10 @@ def create_app(
     @app.get("/v1/models", response_model=list[ModelSpec])
     async def models() -> list[ModelSpec]:
         return resolved_registry.list()
+
+    @app.get("/v1/runtime/package", response_model=RuntimePackageStatusResponse)
+    async def runtime_package() -> RuntimePackageStatusResponse:
+        return resolved_runtime_package_manager.status()
 
     @app.get("/v1/catalog", response_model=WorkflowCatalogStatusResponse)
     async def workflow_catalog() -> WorkflowCatalogStatusResponse:

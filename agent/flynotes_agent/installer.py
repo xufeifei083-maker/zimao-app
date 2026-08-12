@@ -11,6 +11,7 @@ from pathlib import Path
 
 from .downloads import DownloadError, DownloadPaused, ResumableDownloader, huggingface_file_url
 from .runtime import ComfyRuntimeManager
+from .runtime_package import RuntimePackageError, RuntimePackageManager
 from .schemas import (
     WorkflowInstallOperationResponse,
     WorkflowInstallState,
@@ -32,11 +33,15 @@ class WorkflowInstaller:
         runtime: ComfyRuntimeManager,
         *,
         downloader: ResumableDownloader | None = None,
+        runtime_package_manager: RuntimePackageManager | None = None,
     ) -> None:
         self.manager = manager
         self.config = manager.config
         self.runtime = runtime
         self.downloader = downloader or ResumableDownloader(timeout=120)
+        self.runtime_package_manager = runtime_package_manager or RuntimePackageManager(
+            self.config
+        )
         self._operations: dict[str, WorkflowInstallOperationResponse] = {}
         self._tasks: dict[str, asyncio.Task[None]] = {}
         self._desired_state: dict[str, WorkflowInstallState] = {}
@@ -240,6 +245,17 @@ class WorkflowInstaller:
     async def _run(self, operation_id: str) -> None:
         operation = self._operations[operation_id]
         try:
+            if self.config.runtime_validation_errors():
+                model_total = operation.totalBytes
+                operation.state = WorkflowInstallState.DOWNLOADING
+                operation.currentResourceId = "zimao-runtime"
+                operation.currentFilename = self.config.runtime_id
+                await self.runtime_package_manager.install(
+                    should_pause=lambda: operation_id in self._desired_state,
+                    progress=lambda current, total: self._runtime_progress(
+                        operation, current, total, model_total
+                    ),
+                )
             models = await self._missing_models(operation)
             completed = max(
                 operation.totalBytes - sum(model.size or 0 for model in models), 0
@@ -292,7 +308,7 @@ class WorkflowInstaller:
             operation.state = desired
             operation.errorCode = ""
             operation.errorMessage = ""
-        except (DownloadError, WorkflowInstallError) as error:
+        except (DownloadError, WorkflowInstallError, RuntimePackageError) as error:
             operation.state = WorkflowInstallState.FAILED
             operation.errorCode = error.code
             operation.errorMessage = str(error)
@@ -303,3 +319,18 @@ class WorkflowInstaller:
         finally:
             operation.updatedAt = datetime.now(UTC)
             self._save(force=True)
+
+    def _runtime_progress(
+        self,
+        operation: WorkflowInstallOperationResponse,
+        current: int,
+        runtime_total: int,
+        model_total: int,
+    ) -> None:
+        operation.totalBytes = runtime_total + model_total
+        operation.downloadedBytes = current
+        operation.progressPercent = (
+            current / operation.totalBytes * 100 if operation.totalBytes else 0
+        )
+        operation.updatedAt = datetime.now(UTC)
+        self._save()

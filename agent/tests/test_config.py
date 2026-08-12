@@ -27,3 +27,14 @@ def test_config_writes_comfyui_extra_model_paths(config) -> None:
     assert str(config.models_path).replace("\\", "/") in contents
     assert "checkpoints: checkpoints" in contents
     assert "text_encoders: text_encoders" in contents
+
+
+def test_config_can_activate_managed_runtime(config) -> None:
+    config.ensure_directories()
+    runtime = config.runtimes_path / "win-nvidia-test"
+    runtime.mkdir()
+
+    config.activate_runtime("win-nvidia-test", runtime)
+
+    assert config.comfy_root == runtime.resolve()
+    assert config.runtime_pointer_path.is_file()
